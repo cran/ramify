@@ -1,0 +1,26 @@
+export(
+  mat,
+  bmat,
+  dmat,
+  eye,
+  hcat,
+  falses,
+  fill,
+  flatten,
+  inv,
+  linspace,
+  logspace,
+  ones,
+  rand,
+  randn,
+  resize,
+  size,
+  trues,
+  vcat,
+  zeros
+)    
+
+## Methods
+S3method(mat, default)    
+S3method(mat, character)
+S3method(mat, list)  
