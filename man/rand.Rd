@@ -2,38 +2,34 @@
 % Please edit documentation in R/convenience.R
 \name{rand}
 \alias{rand}
-\alias{randn}
-\title{Matrix of Random Numbers}
+\title{Matrix/Array of Uniform Random Numbers}
 \usage{
-rand(nrow = 1, ncol = 1, ...)
-
-randn(nrow = 1, ncol = 1, ...)
+rand(nrow = 1, ncol = 1, ..., min = 0, max = 1)
 }
 \arguments{
 \item{nrow}{The desired number of rows.}
 
 \item{ncol}{The desired number of columns.}
 
-\item{...}{Additional optional arguments to be passed on to \code{runif} or
-           \code{rnorm}.}
+\item{...}{Further dimensions of the array.}
+
+\item{min}{Lower limit for the uniform distribution. Must be finite.
+(\code{rand} only).}
+
+\item{max}{Upper limit for the uniform distribution. Must be finite.
+  (\code{rand} only).}
 }
 \value{
-An \code{nrow}-by-\code{ncol} matrix of pseudorandom numbers.
+A  matrix or array of pseudorandom numbers.
 }
 \description{
-Construct a matrix of random deviates.
-}
-\details{
-\code{rand} generates a matrix of uniform random deviates while
-  \code{randn} generates a matrix of normal random deviates.
+Construct a matrix or multi-way array of uniform random deviates.
 }
 \examples{
-rand(2, 3)  # 2-by-3 matrix of uniform random numbers
+rand(100, 100)  # 100 by 100 matrix of uniform random numbers
 rand(2, 3, min = 100, max = 200)
-randn(2, 3)  # 2-by-3 matrix of standard normal random variates
-randn(2, 3, mean = 10, sd = 0.1)
 }
 \seealso{
-\code{\link{runif}}, \code{\link{rnorm}}.
+\code{\link{randi}}, \code{\link{randn}}, \code{\link{runif}}.
 }
 

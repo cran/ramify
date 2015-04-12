@@ -1,7 +1,6 @@
-#' Matrices
+#' Block Matrices
 #'
-#' Like \code{mat}, \code{bmat} creates a matrix from the given set of values. 
-#' These values, however, must be represented by a character string.
+#' Construct a block matrix using a character string initializer.
 #' 
 #' @param x A data vector, character string, or a list.
 #' @param rows Logical. If TRUE (the default) the matrix is filled by rows, 
@@ -38,6 +37,8 @@ bmat <- function(x, rows = TRUE, sep = ",", ...) {
     do.call(bind1, lapply(strsplit(x, split = sep)[[1]], 
                           function(y) eval(parse(text = y))))
   })
-  do.call(bind2, combined) 
+  m <- do.call(bind2, combined) 
+  class(m) <- c("matrix", "mat")
+  m
   
 }

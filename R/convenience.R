@@ -18,6 +18,40 @@
 ##}
 
 
+#' Row/Column Max/Min Indices
+#'
+#' Returns the indices of the maximum or minimum values along an axis.
+#' 
+#' @param x A matrix.
+#' @param rows If \code{TRUE} (the default) the indices of each row max/min is
+#'             returned. 
+#' @return A vector of indices.
+#' 
+#' @export
+#' 
+#' @examples
+#' m <- mat("94, 20, 44; 40, 92, 51; 27, 69, 74")
+#' argmax(m)
+#' argmin(m)
+argmax <- function(x, rows = TRUE) {
+  if (rows) {
+    apply(x, MARGIN = 1, which.max)
+  } else {
+    apply(x, MARGIN = 2, which.max)
+  }
+}
+
+#' @rdname argmax
+#' @export
+argmin <- function(x, rows = TRUE) {
+  if (rows) {
+    apply(x, MARGIN = 1, which.min)
+  } else {
+    apply(x, MARGIN = 2, which.min)
+  }
+}
+
+
 #' Identity Matrix
 #' 
 #' Creates an \code{nrow}-by-\code{ncol} identity matrix.
@@ -36,38 +70,9 @@
 #' eye(3, 5)  # 3-by-5 identity matrix
 #' eye(5, 3)  # 5-by-3 identity matrix
 eye <- function(nrow = 1, ncol = nrow) {
-  diag(1, nrow, ncol)
-}
-
-
-#' Matrix of Logical Values
-#' 
-#' Creates an \code{nrow}-by-\code{ncol} matrix of logical values.
-#' 
-#' @param nrow The desired number of rows.
-#' @param ncol The desired number of columns.
-#' 
-#' @return An \code{nrow}-by-\code{ncol} matrix of logical values.
-#' 
-#' @export
-#' @seealso \code{\link{fill}}, \code{\link{ones}}, \code{\link{zeros}}.
-#' 
-#' @examples
-#' falses(3)  # column vector of FALSEs
-#' fill(FALSE, 3)
-#' resize(as.logical(zeros(3)), 3)
-#' trues(2, 3)  # 2-by-3 matrix of TRUEs
-#' fill(TRUE, 2, 3)
-#' resize(as.logical(ones(2, 3)), 2, 3)
-falses <- function(nrow = 1, ncol = 1) {
-  matrix(rep(FALSE, times = nrow * ncol), nrow = nrow, ncol = ncol)
-}
-
-
-#' @rdname falses
-#' @export
-trues <- function(nrow = 1, ncol = 1) {
-  matrix(rep(TRUE, times = nrow * ncol), nrow = nrow, ncol = ncol)
+  m <- diag(1L, nrow, ncol)
+  class(m) <- c("matrix", "mat")
+  m
 }
 
 
@@ -78,26 +83,62 @@ trues <- function(nrow = 1, ncol = 1) {
 #' @param x The (single) value to fill the matrix with.
 #' @param nrow The desired number of rows.
 #' @param ncol The desired number of columns.
+#' @param ... Further dimensions of the array.
+#' 
+#' @return A matrix or array filled with the value \code{x}.
 #' 
 #' @export
-#' @seealso \code{\link{ones}}, \code{\link{zeros}}, \code{\link{falses}}, \code{\link{trues}}, \code{\link{mat}}, \code{\link{matrix}}.
+#' @seealso \code{\link{ones}}, \code{\link{zeros}}, \code{\link{falses}}, 
+#'   \code{\link{trues}}, \code{\link{mat}}, \code{\link{matrix}}.
 #' 
 #' @examples
-#' fill(pi, 3, 5)
-#' mat(pi, 3, 5)  # same as 'matrix(pi, 3, 5)'
+#' fill(pi, 3, 5)  # 3-by-5 matrix filled with the value of pi
+#' fill(pi, 3, 5, 2, 2)  # 3-by-5-by-2-by-2 array filled with the value of pi
 #' pi * ones(3, 5)
-fill <- function(x, nrow = 1, ncol = 1) {
-  matrix(rep(x, times = nrow * ncol), nrow = nrow, ncol = ncol)
+fill <- function(x, nrow = 1, ncol = 1, ...) {
+  if (length(list(...)) == 0) {
+    m <- matrix(x, nrow = nrow, ncol = ncol)
+    class(m) <- c("matrix", "mat")
+    m
+  } else {
+    array(x, dim = c(nrow, ncol, unlist(list(...))))
+  }
 }
 
 
-#' Flatten Matrices
+#' @rdname fill
+#' @export
+falses <- function(nrow = 1, ncol = 1, ...) {
+  fill(FALSE, nrow = nrow, ncol = ncol, ...)
+}
+
+#' @rdname fill
+#' @export
+trues <- function(nrow = 1, ncol = 1, ...) {
+  fill(TRUE, nrow = nrow, ncol = ncol, ...)
+}
+
+#' @rdname fill
+#' @export
+ones <- function(nrow = 1, ncol = 1, ...) {
+  fill(1L, nrow = nrow, ncol = ncol, ...)
+}
+
+#' @rdname fill
+#' @export
+zeros <- function(nrow = 1, ncol = 1, ...) {
+  fill(0L, nrow = nrow, ncol = ncol, ...)
+}
+
+
+#' Flatten Matrices/Arrays
 #'
-#' Flatten (i.e., collapse) a matrix to one dimension.
+#' Flatten (i.e., collapse) a matrix or array to one dimension.
 #' 
 #' @param x A matrix object.
 #' @param across Character string specifying whether to flatten the matrix 
-#'   across \code{"rows"} (default) or \code{"columns"}.
+#'   across \code{"rows"} (default) or \code{"columns"}. This option is ignored
+#'   for multi-way arrays.
 #' 
 #' @return A numeric vector.
 #' 
@@ -109,9 +150,11 @@ fill <- function(x, nrow = 1, ncol = 1) {
 #' flatten(m)
 #' flatten(m, across = "columns")
 flatten <- function(x, across = c("rows", "columns")) {
-  ## FIXME: Add across option?
-  across <- match.arg(across)
-  if (across == "rows") x <- t(x)
+  if (is.matrix(x)) {
+    if (is.mat(x)) class(x) <- "matrix"  # remove "mat" class
+    across <- match.arg(across)
+    if (across == "rows") x <- t(x)
+  } 
   dim(x) <- NULL  # remove dimension attribute
   x
 }
@@ -139,7 +182,9 @@ inv <- function(x, ...) {
   }
   b <- diag(1, nrow(x))
   colnames(b) <- rownames(x)
-  solve(x, b, ...)
+  m <- solve(x, b, ...)
+  class(m) <- c("matrix", "mat")
+  m
 }
 
 
@@ -147,7 +192,7 @@ inv <- function(x, ...) {
 #' 
 #' Concatenate matrices along the first or second dimension.
 #' 
-#' @param ... Arguments to be formed into a list.
+#' @param ... Vectors or matrices.
 #' 
 #' @export
 #' @seealso \code{\link{bmat}}, \code{\link{cbind}}, \code{\link{rbind}}.
@@ -158,13 +203,17 @@ inv <- function(x, ...) {
 #' hcat(m1, m2)  # same as 'bmat("m1, m2")'
 #' vcat(m1, m2)  # same as 'bmat("m1; m2")'
 hcat <- function(...) {
-  do.call(cbind, list(...))
+  m <- do.call(cbind, list(...))
+  class(m) <- c("matrix", "mat")
+  m
 }
 
 #' @rdname hcat
 #' @export
 vcat <- function(...) {
-  do.call(rbind, list(...))
+  m <- do.call(rbind, list(...))
+  class(m) <- c("matrix", "mat")
+  m
 }
 
 
@@ -220,80 +269,120 @@ logspace <- function(a, b, n = 50, base = 10) {
 }
 
 
-#' Matrix of Ones or Zeros
+#' Matrix/Array of Uniform Random Numbers
 #' 
-#' Construct a matrix of all ones or zeros.
-#' 
-#' @param nrow The desired number of rows.
-#' @param ncol The desired number of columns.
-#' 
-#' @return An \code{nrow}-by-\code{ncol} matrix of ones or zeros.
-#' 
-#' @export
-#' @seealso \code{\link{fill}}, \code{\link{falses}}, \code{\link{trues}}.
-#' 
-#' @examples 
-#' ones(3)  # column matrix of ones
-#' fill(1, 3)
-#' zeros(3, 5)  # 3-by-5 matrix of zeros
-#' fill(0, 3, 5)
-ones <- function(nrow, ncol = 1) {
-  matrix(rep(1, nrow * ncol), nrow = nrow, ncol = ncol)
-}
-
-
-#' @rdname ones
-#' @export
-zeros <- function(nrow, ncol = 1) {
-  matrix(rep(0, nrow * ncol), nrow = nrow, ncol = ncol)
-}
-
-
-#' Matrix of Random Numbers
-#' 
-#' Construct a matrix of random deviates.
+#' Construct a matrix or multi-way array of uniform random deviates.
 #' 
 #' @param nrow The desired number of rows.
 #' @param ncol The desired number of columns.
-#' @param ... Additional optional arguments to be passed on to \code{runif} or
-#'            \code{rnorm}.
-#' 
-#' @return An \code{nrow}-by-\code{ncol} matrix of pseudorandom numbers.
-#' 
-#' @details \code{rand} generates a matrix of uniform random deviates while
-#'   \code{randn} generates a matrix of normal random deviates.
+#' @param ... Further dimensions of the array.
+#' @param min Lower limit for the uniform distribution. Must be finite. 
+#'   (\code{rand} only).
+#' @param max Upper limit for the uniform distribution. Must be finite. 
+#'   (\code{rand} only).
+#'   
+#' @return A  matrix or array of pseudorandom numbers.
 #' 
 #' @export
-#' @seealso \code{\link{runif}}, \code{\link{rnorm}}.
+#' @seealso \code{\link{randi}}, \code{\link{randn}}, \code{\link{runif}}.
 #' 
 #' @examples
-#' rand(2, 3)  # 2-by-3 matrix of uniform random numbers
+#' rand(100, 100)  # 100 by 100 matrix of uniform random numbers
 #' rand(2, 3, min = 100, max = 200)  
-#' randn(2, 3)  # 2-by-3 matrix of standard normal random variates
-#' randn(2, 3, mean = 10, sd = 0.1)
-rand <- function(nrow = 1, ncol = 1, ...) {
-  matrix(runif(nrow * ncol, ...), nrow = nrow, ncol = ncol)
+rand <- function(nrow = 1, ncol = 1, ..., min = 0, max = 1) {
+  if (length(list(...)) == 0) {
+    m <- matrix(runif(nrow * ncol, min = min, max = max), nrow = nrow, 
+                ncol = ncol)
+    class(m) <- c("matrix", "mat")
+    m
+  } else {
+    array(runif(nrow * ncol * prod(unlist(list(...))), min = min, max = max), 
+          dim = c(nrow, ncol, unlist(list(...))))
+  }
+  
 }
 
 
-#' @rdname rand
-#' @export
-randn <- function(nrow = 1, ncol = 1, ...) {
-  matrix(rnorm(nrow * ncol, ...), nrow = nrow, ncol = ncol)
-}
 
-
-#' Resize Matrix
+#' Matrix/Array of Uniform Random Integers
 #' 
-#' Change shape and size of a matrix.
+#' Construct a matrix or multi-way array of uniform random integers.
 #' 
-#' @param x A \code{"matrix"} or \code{R} object.
+#' @param imax A positive integer.
 #' @param nrow The desired number of rows.
 #' @param ncol The desired number of columns.
+#' @param ... Further dimensions of the array.
+#' 
+#' @return A  matrix or array of pseudorandom numbers.
+#' 
+#' @export
+#' @seealso \code{\link{rand}}, \code{\link{randn}}, \code{\link{sample}}.
+#' 
+#' @examples
+#' randi(2, 5, 5)
+randi <- function(imax, nrow, ncol = 1, ...) {
+  if (!is.integer(imax)) imax <- as.integer(imax)
+  if (imax < 1)  {  # make sure imax is a positive integer
+    stop("imax must be a positive integer.") 
+  }
+  if (length(list(...)) == 0) {
+    m <- matrix(sample(imax, size = nrow * ncol, replace = TRUE), nrow = nrow, 
+                ncol = ncol)
+    class(m) <- c("matrix", "mat")
+    m
+  } else {
+    array(sample(imax, size = nrow * ncol * prod(unlist(list(...))), 
+                 replace = TRUE), dim = c(nrow, ncol, unlist(list(...))))
+  }
+}
+
+
+#' Matrix/Array of Normal Random Numbers
+#' 
+#' Construct a matrix or multi-way array of normal random deviates.
+#' 
+#' @param nrow The desired number of rows.
+#' @param ncol The desired number of columns.
+#' @param ... Further dimensions of the array.
+#' @param mean Mean for the normal distribution. (\code{randn} only).
+#' @param sd Standard deviation for the normal distribution. 
+#'   (\code{randn} only).
+#' 
+#' @return A  matrix or array of pseudorandom numbers.
+#' 
+#' @export
+#' @seealso \code{\link{rand}}, \code{\link{randi}}, \code{\link{rnorm}}.
+#' 
+#' @examples
+#' randn(100, 100)  # 100 by 100 matrix of standard normal random variates
+#' randn(2, 3, mean = 10, sd = 0.1)
+randn <- function(nrow = 1, ncol = 1, ..., mean = 0, sd = 1) {
+  if (length(list(...)) == 0) {
+    m <- matrix(rnorm(nrow * ncol, mean = mean, sd = sd), nrow = nrow, 
+                ncol = ncol)
+    class(m) <- c("matrix", "mat")
+    m
+  } else {
+    array(rnorm(nrow * ncol * prod(unlist(list(...))), mean = mean, sd = sd), 
+          dim = c(nrow, ncol, unlist(list(...))))
+  }
+}
+
+
+#' Resize Matrices and Arrays
+#' 
+#' Change shape and size of a matrix or array.
+#' 
+#' @param x A matrix or multi-way array.
+#' @param nrow The desired number of rows.
+#' @param ncol The desired number of columns.
+#' @param ... Further dimensions of the array.
 #' @param across Character string specifying whether to flatten the matrix 
-#'               across \code{"rows"} (default) or \code{"columns"}.
+#'               across \code{"rows"} (default) or \code{"columns"}. This option
+#'               is ignored for multi-way arrays.
 #' @param byrow Logical. If FALSE (default) the new matrix is filled by columns, 
-#'                       otherwise it is filled by rows.
+#'                       otherwise it is filled by rows. This option is ignored
+#'                       for multi-way arrays.
 #'              
 #' @return A matrix of dimension \code{nrow}-by-\code{ncol}.
 #' 
@@ -305,7 +394,7 @@ randn <- function(nrow = 1, ncol = 1, ...) {
 #' resize(m)
 #' resize(m, 3, 3)
 #' resize(m, 2, 2)
-resize <- function(x, nrow, ncol, across = c("rows", "columns"), 
+resize <- function(x, nrow, ncol, ..., across = c("rows", "columns"), 
                    byrow = FALSE) {
   
   ## Make sure x is a matrix. If it's not, try converting it.
@@ -315,18 +404,26 @@ resize <- function(x, nrow, ncol, across = c("rows", "columns"),
   
   # Flatten and reshape/resize matrix.
   across <- match.arg(across)
-  matrix(flatten(x, across = across), nrow = nrow, ncol = ncol, byrow = byrow)
-  
+  if (length(list(...)) == 0) {
+    m <- matrix(flatten(x, across = across), nrow = nrow, ncol = ncol, 
+                byrow = byrow)
+    class(m) <- c("matrix", "mat")
+    m
+  } else {
+    dim(x) <- c(nrow, ncol, unlist(list(...)))
+  }
+  x
+
 }
 
 
-#' Dimensions of a Matrix
+#' Dimensions of a Matrix/Array
 #' 
-#' Retrieve the dimensions of a matrix.
+#' Retrieve the dimensions of a matrix or array.
 #' 
-#' @param x A matrix or data frame.
+#' @param x A matrix, array, or data frame.
 #' 
-#' @return The dimensions of a matrix.
+#' @return The dimensions of the object.
 #' 
 #' @export
 #' @seealso \code{\link{dim}}.
