@@ -3,14 +3,25 @@
 #' Prettier printing for matrices and data frames.
 #' 
 #' @param x An object of class \code{"matrix"} or \code{"data.frame"}.
-#' @param rowdots Abc.
-#' @param coldots Def.
+#' @param rowdots Integer specifying the row to replace with \code{...} 
+#'   notation. Default is 4.
+#' @param coldots Integer specifying the column to replace with \code{...} 
+#'   notation. Default is 4.
 #' @param digits The minimum number of significant digits to be printed in 
 #'   values.
 #' @param ... Additional optional arguments. None are used at present.
+#' 
+#' @details 
+#' For object of class \code{"matrix"} or \code{"data.frame"} (which are coerced 
+#' to a matrix via the \code{data.matrix} function), \code{pprint} will replace 
+#' all the rows starting from \code{rowdots} up to and including the second-to-last 
+#' row with a single row filled with \code{...}s. The same is applied to the 
+#' columns as well. Hence a large matrix (or data frame) will be printed in a 
+#' much more compact form. 
 #' @export
 #' @examples
 #' pprint(randn(100, 100))
+#' pprint(resize(1:100, 10, 10))
 pprint <- function(x, ...) {
   UseMethod("pprint")
 }
@@ -91,4 +102,14 @@ pprint.matrix <- function(x, rowdots = NULL, coldots = NULL, digits = NULL,
   # Return a (temporarily) invisible copy of x
   invisible(x)
   
+}
+
+
+#' @rdname pprint
+#' @method pprint data.frame
+#' @export
+pprint.data.frame <- function(x, rowdots = NULL, coldots = NULL, digits = NULL, 
+                              ...) {
+  pprint(data.matrix(x), rowdots = rowdots, coldots = coldots, digits = digits,
+         ...) 
 }

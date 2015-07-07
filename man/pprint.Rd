@@ -2,6 +2,7 @@
 % Please edit documentation in R/pprint.R
 \name{pprint}
 \alias{pprint}
+\alias{pprint.data.frame}
 \alias{pprint.matrix}
 \title{Pretty Printing}
 \usage{
@@ -9,15 +10,20 @@ pprint(x, ...)
 
 \method{pprint}{matrix}(x, rowdots = NULL, coldots = NULL, digits = NULL,
   ...)
+
+\method{pprint}{data.frame}(x, rowdots = NULL, coldots = NULL,
+  digits = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{"matrix"} or \code{"data.frame"}.}
 
 \item{...}{Additional optional arguments. None are used at present.}
 
-\item{rowdots}{Abc.}
+\item{rowdots}{Integer specifying the row to replace with \code{...}
+notation. Default is 4.}
 
-\item{coldots}{Def.}
+\item{coldots}{Integer specifying the column to replace with \code{...}
+notation. Default is 4.}
 
 \item{digits}{The minimum number of significant digits to be printed in
 values.}
@@ -25,7 +31,16 @@ values.}
 \description{
 Prettier printing for matrices and data frames.
 }
+\details{
+For object of class \code{"matrix"} or \code{"data.frame"} (which are coerced
+to a matrix via the \code{data.matrix} function), \code{pprint} will replace
+all the rows starting from \code{rowdots} up to and including the second-to-last
+row with a single row filled with \code{...}s. The same is applied to the
+columns as well. Hence a large matrix (or data frame) will be printed in a
+much more compact form.
+}
 \examples{
 pprint(randn(100, 100))
+pprint(resize(1:100, 10, 10))
 }
 

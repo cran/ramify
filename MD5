@@ -1,15 +1,15 @@
-f6ac675ab96a3f6899426a406bf28788 *DESCRIPTION
-971ca2a614c101e34885d3aee4d5b7db *NAMESPACE
-7d7b55c34f8b34c92155829e6a507e5b *NEWS
+a799022266c9286bca34e922face6761 *DESCRIPTION
+b0d289fffcffa099b2b7ecb39960b75e *NAMESPACE
+c83f892aacd93f2c1ff6df6fd5af4e13 *NEWS
 ee801db18c2f8d1d7c47091309dc00c7 *R/bmat.R
-f71b4554478b27c1adbbe6a758992439 *R/convenience.R
+803fc3180e9249d2a37467725e6f94bb *R/convenience.R
 68c505b5e237a78620d3a17a5c2970e0 *R/dmat.R
 c1772a0189789e839f36b4f720edbf34 *R/mat.R
-1bcb2013a3bd26bc4d8aaf6b34e64c48 *R/pprint.R
+f4abce4fb9a673ae6b7004828c14fe5d *R/pprint.R
 8aae7e6ef9df0fdf8ddab2d5195f7452 *R/ramify.R
 27685e26d29d55c51f974d3d132b4ffd *R/utils.R
 d30edcb7a74f0ac9dd50092785edc138 *R/zzz.R
-15613692b6fb0a72e38b877adf5b5f91 *README.md
+a64ecafb90d8816fe5fd30e6ec1d6844 *README.md
 831dad8aa4a07fa111d6277978207864 *man/add_dots.Rd
 6fa988458c8fa47be12fd8008a1967c1 *man/argmax.Rd
 79b7fafc6e8f15a0ec82723533ea9748 *man/atleast_2d.Rd
@@ -27,7 +27,7 @@ fea2844a97d6ec3630cfbdf5cde89e07 *man/is.tril.Rd
 2a0d82b1a9876a19342898393902ae65 *man/logspace.Rd
 485377ac80b74a38a8ca3da8b1ef2c02 *man/mat.Rd
 46968eaf286eb494069f5e7421dd3606 *man/meshgrid.Rd
-12f6c969b6f495afcf3b6ef47d9d0d88 *man/pprint.Rd
+c3e76a336d9e82d312d30ee3dcc5dfc8 *man/pprint.Rd
 14341df803dc43e486540e486338bf72 *man/ramify.Rd
 d846745da48d41244f8862e8c5ab3326 *man/rand.Rd
 48c6b9feb0506d1f8ab1d801c5c1b802 *man/randi.Rd
@@ -39,5 +39,5 @@ fa652d496eb9b366b77329fbdc27b71b *man/size.Rd
 12debd3cb1535903a022e094b7840ab6 *man/tril.Rd
 fc8f309610594626aae5ef95cf7c1fe9 *man/triu.Rd
 2516982369aa3146e7f1e46d13209b0c *tests/testthat.R
-b897930328deec8a7c31584ed7d172f9 *tests/testthat/test-convenience.R
+0f37f6d6f616fcf2d46da5b966a48c23 *tests/testthat/test-convenience.R
 4ad082b88142939a5e783048ebd56da8 *tests/testthat/test-mat.R
