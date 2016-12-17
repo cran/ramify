@@ -48,14 +48,46 @@ atleast_2d <- function(x) {
   x
 }
 
+
+#' Clip Values
+#'
+#' Clip (i.e., limit) the values in a vector, matrix, or array.
+#' 
+#' @param x A vector, matrix, or multi-way array.
+#' @param .min .minimum value.
+#' @param .max .maximum value.
+#' @param ... Additional optional arguments.
+#' @return Returns \code{x} with values outside the interval 
+#'   [\code{.min}, \code{.max}] clipped to the interval edges. That is, values 
+#'   in \code{x} smaller than \code{.min} become \code{.min}, and values larger 
+#'   than \code{.max} become \code{.max}.
+#' @export
+#' @examples 
+#' clip(1:10, 3, 8)  # [1] 3 3 3 4 5 6 7 8 8 8
+#' clip(randn(5, 5), .min = -1, .max = 1)
+clip <- function(x, .min, .max, ...) {
+  UseMethod("clip")
+}
+
+
+#' @rdname clip
+#' @method clip default
+#' @export
+clip.default <- function(x, .min, .max, ...) {
+  # Default should work for matrices and arrays
+  if (!missing(.min)) x[x < .min] <- .min
+  if (!missing(.max)) x[x > .max] <- .max
+  x
+}
+
+
 #' Identity Matrix
 #' 
 #' Creates an \code{nrow}-by-\code{ncol} identity matrix.
 #' 
 #' @param nrow The desired number of rows.
 #' @param ncol The desired number of columns.
-#' @return A \code{nrow}-by-\code{ncol} identity matrix of class 
-#'         \code{c("matrix", "mat")}.
+#' @return A \code{nrow}-by-\code{ncol} identity matrix.
 #' @seealso \code{\link{diag}}.
 #' @export
 #' @examples
@@ -80,8 +112,7 @@ eye <- function(nrow = 1, ncol = nrow) {
 #'   to have a second dimension equal to one. Defaults to \code{FALSE}. This 
 #'   behavior can also be changed globally using, for example 
 #'   \code{options(atleast_2d = TRUE)}.
-#' @return A matrix or array filled with the value \code{x}. If the result is a
-#'         matrix, it will have class \code{c("matrix", "mat")}.
+#' @return A matrix or array filled with the value \code{x}.
 #' @seealso \code{\link{ones}}, \code{\link{zeros}}, \code{\link{falses}}, 
 #'   \code{\link{trues}}, \code{\link{mat}}, \code{\link{matrix}}.
 #' @export
@@ -187,9 +218,8 @@ inv <- function(x, ...) {
 #' Concatenate matrices along the first or second dimension.
 #' 
 #' @param ... Vectors or matrices.
-#' @return A matrix of class \code{c("matrix", "mat")} formed by combining the
-#'          \code{...} arguments column-wise (\code{hcat}) or row-wise 
-#'          (\code{vcat}).
+#' @return A matrix formed by combining the \code{...} arguments column-wise 
+#'   (\code{hcat}) or row-wise (\code{vcat}).
 #' @seealso \code{\link{bmat}}, \code{\link{cbind}}, \code{\link{rbind}}.
 #' @export
 #' @examples
@@ -260,7 +290,7 @@ logspace <- function(a, b, n = 50, base = 10) {
 #' 
 #' @param x Numeric vector representing the first coordinate of the grid.
 #' @param y Numeric vector representing the second coordinate of the grid.
-#' @return a list of matrices, each having class \code{c("matrix", "mat")}.
+#' @return A list of matrices.
 #' @seealso \code{\link{expand.grid}}, \code{\link{outer}}.
 #' @export
 #' @examples
@@ -277,7 +307,6 @@ meshgrid <- function(x, y = x) {
   #        as.mat(matrix(rep(y, times = lenx), nrow = leny, ncol = lenx)))
 }
 
-
 #' Matrix/Array of Uniform Random Numbers
 #' 
 #' Construct a matrix or multi-way array of uniform random deviates.
@@ -293,8 +322,7 @@ meshgrid <- function(x, y = x) {
 #'   to have a second dimension equal to one. Defaults to \code{FALSE}. This 
 #'   behavior can also be changed globally using, for example 
 #'   \code{options(atleast_2d = TRUE)}.
-#' @return A  matrix or array of pseudorandom numbers. If the result is a
-#'         matrix, it will have class \code{c("matrix", "mat")}.
+#' @return A  matrix or array of pseudorandom numbers.
 #' @seealso \code{\link{randi}}, \code{\link{randn}}, \code{\link{runif}}.
 #' @export
 #' @importFrom stats runif
@@ -330,8 +358,7 @@ rand <- function(nrow = 1, ncol = 1, ..., min = 0, max = 1, atleast_2d = NULL) {
 #'   to have a second dimension equal to one. Defaults to \code{FALSE}. This 
 #'   behavior can also be changed globally using, for example 
 #'   \code{options(atleast_2d = TRUE)}.
-#' @return A matrix or array of pseudorandom numbers. If the result is a matrix, 
-#'         it will have class \code{c("matrix", "mat")}.
+#' @return A matrix or array of pseudorandom numbers.
 #' @seealso \code{\link{rand}}, \code{\link{randn}}, \code{\link{sample}}.
 #' @export
 #' @examples
@@ -370,8 +397,7 @@ randi <- function(imax, nrow, ncol = 1, ..., atleast_2d = NULL) {
 #'   to have a second dimension equal to one. Defaults to \code{FALSE}. This 
 #'   behavior can also be changed globally using, for example 
 #'   \code{options(atleast_2d = TRUE)}.
-#' @return A  matrix or array of pseudorandom numbers. If the result is a 
-#'         matrix, it will have class \code{c("matrix", "mat")}.
+#' @return A  matrix or array of pseudorandom numbers.
 #' @seealso \code{\link{rand}}, \code{\link{randi}}, \code{\link{rnorm}}.
 #' @export
 #' @importFrom stats rnorm
@@ -395,6 +421,26 @@ randn <- function(nrow = 1, ncol = 1, ..., mean = 0, sd = 1,
 }
 
 
+#' Repeat Vectors and Matrices
+#' 
+#' Repeat a vector or matrix a specific number of times.
+#' 
+#' @param x A vector or matrix.
+#' @param m Integer specifying how many times to repeat \code{x} in the first
+#'   dimension.
+#' @param n Integer specifying how many times to repeat \code{x} in the second
+#'   dimension.
+#' @return A block matrix of dimension \code{m}*\code{nrow(x)} by 
+#'   \code{n}*\code{ncol(x)}.
+#' @export
+#' @examples
+#' repmat(1:3, 3, 2)  # will have dimension 9 by 2
+#' repmat(randn(2, 2), 3, 2)
+repmat <- function(x, m, n) {
+  kronecker(ones(m, n), x)
+}
+
+
 #' Resize Matrices and Arrays
 #' 
 #' Change shape and size of a matrix or array.
@@ -410,8 +456,7 @@ randn <- function(nrow = 1, ncol = 1, ..., mean = 0, sd = 1,
 #'                       otherwise it is filled by rows. This option is ignored
 #'                       for multi-way arrays.
 #'              
-#' @return A matrix of class \code{c("matrix", "mat")} with dimension 
-#'         \code{nrow}-by-\code{ncol}.
+#' @return A matrix with dimension \code{nrow}-by-\code{ncol}.
 #' @seealso \code{\link{flatten}}, \code{\link{mat}}, \code{\link{matrix}}.
 #' @export
 #' @examples
